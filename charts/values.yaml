@@ -1,0 +1,79 @@
+# Default values for charts.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+gateway:
+  # if enabled, a gateway resource is created
+  enabled: true
+  apiVersion: gateway.networking.k8s.io/v1
+  class: "istio"
+  annotations: {}
+  addresses:
+  - type: Hostname
+    value: "north-south-gateway.istio-gateway.svc.cluster.local"
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: '*.gpu-local.cloudydemo.com'
+    allowedRoutes:
+      kinds:
+        - kind: HTTPRoute
+      namespaces:
+        from: All
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: '*.gpu-local.cloudydemo.com'
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: gateway-http-https-wildcard-cert
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute
+      namespaces:
+        from: All
+
+httproutes:
+  - name: tgi-http-redirect
+    enabled: true
+    parentRefs:
+      - group: gateway.networking.k8s.io
+        kind: Gateway
+        name: cluster-north-south-gateway
+        namespace: istio-gateway
+        port: 80
+    hostnames:
+      - tgi.gpu-local.cloudydemo.com
+    rules:
+      - filters:
+          - type: RequestRedirect
+            requestRedirect:
+              scheme: https
+              statusCode: 301
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
+  - name: tgi-https
+    enabled: true
+    parentRefs:
+      - group: gateway.networking.k8s.io
+        kind: Gateway
+        name: cluster-north-south-gateway
+        namespace: istio-gateway
+        port: 443
+    hostnames:
+      - tgi.gpu-local.cloudydemo.com
+    rules:
+      - backendRefs:
+          - group: ""
+            kind: Service
+            name: text-generation-deployment
+            port: 8080
+            weight: 1
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
