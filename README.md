@@ -1,6 +1,14 @@
 # unofficial-gateway-api-helm
 A helm chart for managing Gateway API (https://gateway-api.sigs.k8s.io/implementations/) on any provider.
 
+It does two things:
+- generates a Gateway object (for baremetal and GKE)
+- dynamically generates HTTPRoutes (while waiting on OSS chart adoption of Gateway API)
+
+By default it deploys a gateway (disable: `--set gateway.enabled=false`) and does NOT deploy any HTTPRoute(s).
+
+To deploy HTTP routes update and pass a `values.yaml` file.
+
 ## TODO:
 
 - more about "why" (CI automation, BYOgateway API)
@@ -14,9 +22,7 @@ A helm chart for managing Gateway API (https://gateway-api.sigs.k8s.io/implement
 
 Assumes you have installed Gateway API CRDs (https://gateway-api.sigs.k8s.io/guides/#installing-gateway-api) and/or a corresponding implementation (https://gateway-api.sigs.k8s.io/implementations/)
 
-The first goal of this repo is to generate HTTPRoutes for my other workloads that don't have a gateway resource in their helm chart.
 
-TODO: second goal is to include basic gateway bootstrapping (in progress)
 
 ## use
 
@@ -24,6 +30,10 @@ TODO: second goal is to include basic gateway bootstrapping (in progress)
 export GAR_NAME=helm-charts
 export PROJECT=out-of-pocket-cloudlab
 helm template myrelease oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.0
+
+or
+
+helm template <FAKE-NAME> ./charts
 
 helm pull oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.0
 
@@ -115,15 +125,15 @@ Successfully packaged chart and saved it to: /Users/jimangel/unofficial-gateway-
 ```
 
 ```
-helm push unofficial-gateway-api-0.1.0.tgz oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME
+helm push unofficial-gateway-api-0.1.1.tgz oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME
 ```
 
 Test:
 
 ```
-helm pull oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.0
+helm pull oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.1
 
-helm template myrelease oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.0
+helm template myrelease oci://us-central1-docker.pkg.dev/$PROJECT/$GAR_NAME/unofficial-gateway-api --version 0.1.1 --set gateway.enabled=true | kubectl apply --dry-run=client -f -
 ```
 
 Clean up:
@@ -131,4 +141,3 @@ Clean up:
 ```
 rm -rf unofficial-gateway-api-0.1.0.tgz
 ```
-

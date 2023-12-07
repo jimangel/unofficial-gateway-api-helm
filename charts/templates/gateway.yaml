@@ -1,8 +1,9 @@
 {{- if .Values.gateway.enabled }}
-apiVersion: {{ .Values.gateway.apiVersion }}
+apiVersion: {{ .Values.apiVersion }}
 kind: Gateway
 metadata:
   name: {{ include "charts.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "charts.labels" . | nindent 4 }}
 {{- if .Values.gateway.annotations }}

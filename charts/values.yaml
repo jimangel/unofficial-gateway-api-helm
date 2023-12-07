@@ -2,10 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# alt: gateway.networking.k8s.io/v1beta1
+apiVersion: gateway.networking.k8s.io/v1
+
 gateway:
   # if enabled, a gateway resource is created
-  enabled: true
-  apiVersion: gateway.networking.k8s.io/v1
+  enabled: false
   class: "istio"
   annotations: {}
   addresses:
@@ -35,9 +37,10 @@ gateway:
       namespaces:
         from: All
 
+# Can create 1:MANY httproutes
 httproutes:
   - name: tgi-http-redirect
-    enabled: true
+    enabled: false
     parentRefs:
       - group: gateway.networking.k8s.io
         kind: Gateway
@@ -57,7 +60,7 @@ httproutes:
               type: PathPrefix
               value: /
   - name: tgi-https
-    enabled: true
+    enabled: false
     parentRefs:
       - group: gateway.networking.k8s.io
         kind: Gateway

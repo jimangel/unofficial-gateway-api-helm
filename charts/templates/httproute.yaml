@@ -1,9 +1,10 @@
 {{- range .Values.httproutes }}
 {{- if .enabled }}
-apiVersion: gateway.networking.k8s.io/v1beta1
+apiVersion: {{ $.Values.apiVersion }}
 kind: HTTPRoute
 metadata:
   name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   parentRefs:
   {{- toYaml .parentRefs | nindent 3 }}
